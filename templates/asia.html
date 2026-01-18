@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>بوابة شحن تلقائي اسياسيل</title>
+
+    <!-- Bootstrap 5 RTL -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.rtl.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* متغيرات الألوان */
+      :root {
+        --main-bg: #000000; /* خلفية رئيسية */
+        --main-color: #0051ff; /* اللون الرئيسي */
+        --accent-color: #ffc107; /* لون مميز */
+        --danger-color: #dc3545; /* لون التحذير */
+        --success-color: #28a745; /* لون النجاح */
+        --text-color: #333; /* لون النص */
+      }
+
+      @font-face {
+        font-family: "MyCustomFont";
+        src: url("static/ttf/font.ttf");
+        font-weight: bold;
+      }
+      * {
+        font-family: MyCustomFont;
+      }
+      /* التصميم العام */
+      body {
+        background: linear-gradient(135deg, var(--main-bg) 0%, #000000 100%);
+        min-height: 100vh;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text-color);
+      }
+      .text-primary {
+        color: var(--main-color);
+      }
+
+      /* البطاقات */
+      .custom-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: none;
+        transition: all 0.3s ease;
+      }
+
+      .custom-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 123, 255, 0.15);
+      }
+
+      /* الأزرار */
+      .btn-custom {
+        border-radius: 25px;
+        padding: 12px 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      /* حقول الإدخال */
+      .form-control {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+      }
+
+      .form-control:focus {
+        border-color: var(--main-color);
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+
+      /* الصفحات */
+      .page {
+        display: none;
+      }
+
+      .page.active {
+        display: block;
+      }
+
+      /* الرسوم المتحركة */
+      .fade-in {
+        animation: fadeIn 0.5s ease-in;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* تحسينات للموبايل */
+      @media (max-width: 768px) {
+        .container {
+          padding: 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- صفحة تسجيل الدخول -->
+     {% if data['islogin'] %}
+    <div id="loginPage" class="page">
+      {% else %}
+      <div id="loginPage" class="page active">
+      {% endif %}
+      <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100">
+          <div class="col-md-6 col-lg-4">
+            <div class="custom-card p-4 fade-in">
+              <div class="text-center mb-4">
+                <h2 class="text-primary fw-bold">
+                  <i class="bi bi-phone-fill me-2"></i> تسجيل الدخول
+                </h2>
+                <p class="text-muted">أدخل رقم هاتفك للمتابعة</p>
+              </div>
+
+              <!-- حقل رقم الهاتف -->
+              <div class="mb-3">
+                <label for="phoneInput" class="form-label fw-semibold">
+                  <i class="bi bi-telephone me-2"></i> رقم الهاتف
+                </label>
+                <input
+                  type="tel"
+                  class="form-control"
+                  id="phoneInput"
+                  placeholder="07700000000"
+                  maxlength="11"
+                />
+                <div id="phoneValidation" class="mt-1"></div>
+              </div>
+
+              <!-- زر إرسال الكود -->
+              <button
+                class="btn btn-primary btn-custom w-100 mb-3"
+                id="sendCodeBtn"
+              >
+                <span id="sendCodeText"
+                  ><i class="bi bi-envelope-fill me-2"></i> إرسال كود
+                  التحقق</span
+                >
+                <span id="sendCodeSpinner" class="d-none">
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                  جاري الإرسال...
+                </span>
+              </button>
+
+              <!-- منطقة الإشعارات -->
+              <div id="loginAlerts"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+    <!-- صفحة معلومات المستخدم -->
+     {% if data['islogin'] %}
+    <div id="userPage" class="page active">
+     {% else %}
+     <div id="userPage" class="page">
+     {% endif %}
+      <div class="container py-4">
+        <div class="row justify-content-center">
+          <div class="col-md-8 col-lg-6">
+            <!-- بطاقة معلومات المستخدم -->
+            <div class="custom-card p-4 mb-4 fade-in">
+              <div class="text-center mb-4">
+                <h3 class="text-primary fw-bold">
+                  <i class="bi bi-person-fill"></i> معلومات المستخدم
+                </h3>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <div class="col-6">
+                  <div class="text-center p-3 bg-light rounded">
+                    <div class="fw-bold text-primary">
+                      <i class="bi bi-telephone me-2"></i> رقم الهاتف
+                    </div>
+                    <div id="userPhone" class="mt-1">{{data['phone']}}</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="text-center p-3 bg-light rounded">
+                    <div class="fw-bold text-success">
+                      <i class="bi bi-cash-coin"></i> الرصيد
+                    </div>
+                    <div id="userBalance" class="mt-1">{{data['coin']}} دينار</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <div class="col-6">
+                  <div class="text-center p-3 bg-light rounded">
+                    <div class="fw-bold text-info">
+                      <i class="bi bi-person-square"></i> الاسم
+                    </div>
+                    <div id="userName" class="mt-1">{{data['name']}}</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="text-center p-3 bg-light rounded">
+                    <div class="fw-bold text-warning">
+                      <i class="bi bi-house-lock-fill"></i> حالة الجلسة
+                    </div>
+                    {% if data['islogin'] %}
+                    <div class="mt-1 text-success">✅ متصل</div>
+                    {% else %}
+                    <div class="mt-1 text-success">غير متصل ❌</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <!-- أزرار الخدمات -->
+              <div class="row g-2 mb-4">
+                <div class="col-6">
+                  <button
+                    class="btn btn-success btn-custom w-100"
+                    onclick="requestFreeInternet()"
+                  >
+                    <i class="bi bi-wifi"></i> انترنت مجاني
+                  </button>
+                </div>
+                <div class="col-6">
+                  <button
+                    class="btn btn-outline-danger btn-custom w-100"
+                    onclick="logout()"
+                  >
+                    <i class="bi bi-box-arrow-in-left"></i> تسجيل الخروج
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- بطاقة شحن الحساب -->
+            <div class="custom-card p-4 fade-in">
+              <h4 class="text-primary fw-bold mb-3">
+                <i class="bi bi-credit-card-fill"></i> شحن الحساب
+              </h4>
+
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold"
+                    ><i class="bi bi-person-circle"></i> اسم المستخدم</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="chargeUsername"
+                    placeholder="أدخل اسم المستخدم"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold"
+                    ><i class="bi bi-coin"></i> المبلغ (1000-60000)</label
+                  >
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="chargeAmount"
+                    placeholder="15000"
+                    min="1000"
+                    max="60000"
+                  />
+                  <div id="amountValidation" class="mt-1"></div>
+                </div>
+              </div>
+
+              <div class="row g-2">
+                <div class="col-md-6">
+                  <button
+                    class="btn btn-primary btn-custom w-100"
+                    onclick="chargeAccount()"
+                  >
+                    <span id="chargeText"
+                      ><i class="bi bi-check2-circle"></i> شحن حسابي الآن</span
+                    >
+                    <span id="chargeSpinner" class="d-none">
+                      <span
+                        class="spinner-border spinner-border-sm me-2"
+                      ></span>
+                      جاري الشحن...
+                    </span>
+                  </button>
+                </div>
+                <div class="col-md-6">
+                  <button
+                    class="btn btn-outline-primary btn-custom w-100"
+                    onclick="showCardModal()"
+                  >
+                    <i class="bi bi-credit-card-fill"></i> شحن بكارت تعبئة
+                  </button>
+                </div>
+              </div>
+
+              <!-- منطقة الإشعارات -->
+              <div id="userAlerts" class="mt-3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal لإدخال كود التحقق -->
+    <div class="modal fade" id="codeModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title fw-bold">
+              <i class="bi bi-lock"></i> إدخال كود التحقق
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted text-center mb-4">
+              تم إرسال كود مكون من 6 أرقام إلى هاتفك
+            </p>
+
+            <div class="mb-3">
+              <label for="codeInput" class="form-label fw-semibold"
+                ><i class="bi bi-123"></i> كود التحقق</label
+              >
+              <input
+                type="text"
+                class="form-control text-center"
+                id="codeInput"
+                placeholder="123456"
+                maxlength="6"
+                style="letter-spacing: 5px; font-size: 1.2em"
+              />
+              <div id="codeValidation" class="mt-1 text-center"></div>
+            </div>
+
+            <button
+              class="btn btn-success btn-custom w-100"
+              onclick="verifyCode()"
+            >
+              <span id="verifyText"
+                ><i class="bi bi-check-circle-fill"></i> تسجيل الدخول</span
+              >
+              <span id="verifySpinner" class="d-none">
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                جاري التحقق...
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="codeModalPay" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title fw-bold">
+              <i class="bi bi-lock"></i> إدخال كود التحقق
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted text-center mb-4">
+              تم إرسال كود دفع مكون من 6 أرقام إلى هاتفك
+            </p>
+
+            <div class="mb-3">
+              <label for="codeInput2" class="form-label fw-semibold"
+                ><i class="bi bi-123"></i> كود التحقق من الدفع
+              </label>
+              <input
+                type="text"
+                class="form-control text-center"
+                id="codeInput2"
+                placeholder="123456"
+                maxlength="6"
+                style="letter-spacing: 5px; font-size: 1.2em"
+              />
+              <div id="codeValidation2" class="mt-1 text-center"></div>
+            </div>
+
+            <button
+              class="btn btn-success btn-custom w-100"
+              onclick="DoneCodePay()"
+            >
+              <span id="verifyText2"
+                ><i class="bi bi-check-circle-fill"></i>تأكيد عملية الشحن</span
+              >
+              <span id="verifySpinner2" class="d-none">
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                جاري التحقق...
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal لشحن بكارت التعبئة -->
+    <div class="modal fade" id="cardModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title fw-bold">
+              <i class="bi bi-credit-card-fill"></i> شحن بكارت التعبئة
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="cardUsername" class="form-label fw-semibold"
+                ><i class="bi bi-person-circle"></i> اسم المستخدم</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="cardUsername"
+                placeholder="أدخل اسم المستخدم"
+              />
+            </div>
+
+            <div class="mb-4">
+              <label for="cardNumber" class="form-label fw-semibold"
+                ><i class="bi bi-123"></i> رقم الكارت</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="cardNumber"
+                placeholder="أدخل رقم كارت التعبئة"
+              />
+            </div>
+
+            <button
+              class="btn btn-primary btn-custom w-100"
+              onclick="chargeWithCard()"
+            >
+              <span id="cardChargeText"
+                ><i class="bi bi-check2-circle"></i> شحن حسابي الآن</span
+              >
+              <span id="cardChargeSpinner" class="d-none">
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                جاري الشحن...
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // متغيرات عامة
+      let currentUser = null;
+      let codeModalInstance = null;
+      let cardModalInstance = null;
+      let codeModalPay = null;
+      var domin = "https://pay-asiacell-smm.vercel.app";
+      var pidLogin = null;
+      var sidLogin = null;
+      var phone = null;
+
+      // تهيئة الصفحة عند التحميل
+      document.addEventListener("DOMContentLoaded", function () {
+        // تهيئة الـ modals
+        codeModalInstance = new bootstrap.Modal(
+          document.getElementById("codeModal")
+        );
+        cardModalInstance = new bootstrap.Modal(
+          document.getElementById("cardModal")
+        );
+        codeModalPay = new bootstrap.Modal(
+          document.getElementById("codeModalPay")
+        );
+
+        // إضافة مستمعات الأحداث
+        setupEventListeners();
+      });
+
+      // إعداد مستمعات الأحداث
+      function setupEventListeners() {
+        // التحقق من رقم الهاتف أثناء الكتابة
+        document
+          .getElementById("phoneInput")
+          .addEventListener("input", function () {
+            cleanPhoneInput(this);
+            validatePhone();
+          });
+
+        // التحقق من كود التحقق
+        document
+          .getElementById("codeInput")
+          .addEventListener("input", validateCode);
+        document
+          .getElementById("codeInput2")
+          .addEventListener("input", validateCode2);
+
+        // التحقق من مبلغ الشحن
+        document
+          .getElementById("chargeAmount")
+          .addEventListener("input", validateAmount);
+
+        // زر إرسال الكود
+        document
+          .getElementById("sendCodeBtn")
+          .addEventListener("click", sendCode);
+      }
+
+      // تنظيف رقم الهاتف من الفراغات والفواصل
+      function cleanPhoneInput(input) {
+        let value = input.value.replace(/[\s\-\(\)]/g, "");
+        input.value = value;
+      }
+
+      // التحقق من صحة رقم الهاتف
+      function validatePhone() {
+        const phoneInput = document.getElementById("phoneInput");
+        const validation = document.getElementById("phoneValidation");
+        const phone = phoneInput.value.trim();
+
+        if (phone.length === 0) {
+          validation.innerHTML = "";
+          phoneInput.classList.remove("is-valid", "is-invalid");
+          return false;
+        }
+
+        // التحقق من أن الرقم يحتوي على أرقام فقط
+        if (!/^\d+$/.test(phone)) {
+          validation.innerHTML =
+            '<small class="text-danger">⚠️ يجب أن يحتوي على أرقام فقط</small>';
+          phoneInput.classList.add("is-invalid");
+          phoneInput.classList.remove("is-valid");
+          return false;
+        }
+
+        // التحقق من طول الرقم
+        if (phone.length !== 11) {
+          validation.innerHTML =
+            '<small class="text-warning">⚠️ يجب أن يكون الرقم مكونًا من 11 رقم</small>';
+          phoneInput.classList.add("is-invalid");
+          phoneInput.classList.remove("is-valid");
+          return false;
+        }
+
+        // التحقق من أن الرقم يبدأ بـ 077
+        if (!phone.startsWith("077")) {
+          validation.innerHTML =
+            '<small class="text-danger">⚠️ يجب أن يبدأ الرقم بـ 077</small>';
+          phoneInput.classList.add("is-invalid");
+          phoneInput.classList.remove("is-valid");
+          return false;
+        }
+
+        // الرقم صحيح
+        validation.innerHTML =
+          '<small class="text-success"><i class="bi bi-check-circle-fill"></i> رقم صحيح</small>';
+        phoneInput.classList.add("is-valid");
+        phoneInput.classList.remove("is-invalid");
+        return true;
+      }
+
+      // التحقق من كود التحقق
+      function validateCode() {
+        const codeInput = document.getElementById("codeInput");
+        const validation = document.getElementById("codeValidation");
+        const code = codeInput.value.trim();
+
+        if (code.length === 0) {
+          validation.innerHTML = "";
+          codeInput.classList.remove("is-valid", "is-invalid");
+          return false;
+        }
+
+        if (!/^\d+$/.test(code)) {
+          validation.innerHTML =
+            '<small class="text-danger">⚠️ أرقام فقط</small>';
+          codeInput.classList.add("is-invalid");
+          codeInput.classList.remove("is-valid");
+          return false;
+        }
+
+        if (code.length !== 6) {
+          validation.innerHTML =
+            '<small class="text-warning">⚠️ 6 أرقام مطلوبة</small>';
+          codeInput.classList.add("is-invalid");
+          codeInput.classList.remove("is-valid");
+          return false;
+        }
+
+        validation.innerHTML =
+          '<small class="text-success">✅ كود صحيح</small>';
+        codeInput.classList.add("is-valid");
+        codeInput.classList.remove("is-invalid");
+        return true;
+      }
+
+      function validateCode2() {
+        const codeInput = document.getElementById("codeInput2");
+        const validation = document.getElementById("codeValidation2");
+        const code = codeInput.value.trim();
+
+        if (code.length === 0) {
+          validation.innerHTML = "";
+          codeInput.classList.remove("is-valid", "is-invalid");
+          return false;
+        }
+
+        if (!/^\d+$/.test(code)) {
+          validation.innerHTML =
+            '<small class="text-danger">⚠️ أرقام فقط</small>';
+          codeInput.classList.add("is-invalid");
+          codeInput.classList.remove("is-valid");
+          return false;
+        }
+
+        if (code.length !== 6) {
+          validation.innerHTML =
+            '<small class="text-warning">⚠️ 6 أرقام مطلوبة</small>';
+          codeInput.classList.add("is-invalid");
+          codeInput.classList.remove("is-valid");
+          return false;
+        }
+
+        validation.innerHTML =
+          '<small class="text-success">✅ كود صحيح</small>';
+        codeInput.classList.add("is-valid");
+        codeInput.classList.remove("is-invalid");
+        return true;
+      }
+
+      // التحقق من مبلغ الشحن
+      function validateAmount() {
+        const amountInput = document.getElementById("chargeAmount");
+        const validation = document.getElementById("amountValidation");
+        const amount = parseInt(amountInput.value);
+
+        if (!amount) {
+          validation.innerHTML = "";
+          amountInput.classList.remove("is-valid", "is-invalid");
+          return false;
+        }
+
+        if (amount < 1000) {
+          validation.innerHTML =
+            '<small class="text-danger">⚠️ الحد الأدنى 1000 دينار</small>';
+          amountInput.classList.add("is-invalid");
+          amountInput.classList.remove("is-valid");
+          return false;
+        }
+
+        if (amount > 60000) {
+          validation.innerHTML =
+            '<small class="text-danger">⚠️ الحد الأقصى 60000 دينار</small>';
+          amountInput.classList.add("is-invalid");
+          amountInput.classList.remove("is-valid");
+          return false;
+        }
+
+        validation.innerHTML =
+          '<small class="text-success">✅ مبلغ صحيح</small>';
+        amountInput.classList.add("is-valid");
+        amountInput.classList.remove("is-invalid");
+        return true;
+      }
+
+      // إرسال كود التحقق
+      async function sendCode() {
+        if (!validatePhone()) {
+          showAlert("loginAlerts", "danger", "⚠️ يرجى إدخال رقم هاتف صحيح");
+          return;
+        }
+        document.getElementById("codeInput").value = "";
+        const btn = document.getElementById("sendCodeBtn");
+        const text = document.getElementById("sendCodeText");
+        const spinner = document.getElementById("sendCodeSpinner");
+
+        // إخفاء النص وإظهار التحميل
+        text.classList.add("d-none");
+        spinner.classList.remove("d-none");
+        btn.disabled = true;
+        const phoneInput = document.getElementById("phoneInput");
+        const phone = phoneInput.value.trim();
+        const payload = {
+          phone: phone
+        };
+        try {
+          const response = await fetch(domin+"/api/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          if (result.ok == "ok") {
+            console.log(result);
+            codeModalInstance.show();
+            showAlert("loginAlerts", "success", "✅ تم إرسال كود التحقق بنجاح");
+          } else {
+            console.log(result);
+            showAlert("loginAlerts", "danger", result.text);
+          }
+          
+          text.classList.remove("d-none");
+          spinner.classList.add("d-none");
+          btn.disabled = false;
+          return;
+
+        } catch (error) {
+          console.error("فشل الاتصال:", error);
+          showAlert("loginAlerts", "danger", "❌ حدث خطأ في الاتصال بالخادم");
+          text.classList.remove("d-none");
+          spinner.classList.add("d-none");
+          btn.disabled = false;
+          return;
+        }
+      }
+
+      // التحقق من الكود وتسجيل الدخول
+      async function verifyCode() {
+        if (!validateCode()) {
+          return;
+        }
+
+        const text = document.getElementById("verifyText");
+        const spinner = document.getElementById("verifySpinner");
+
+        text.classList.add("d-none");
+        spinner.classList.remove("d-none");
+
+        const phoneInput = document.getElementById("codeInput");
+        const code = phoneInput.value.trim();
+        const payload = {
+          code: code
+        };
+
+        try {
+          const response = await fetch(domin+"/api/smsvalidation", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          if (result.ok == "ok") {
+            console.log(result);
+            showAlert("loginAlerts", "success", "✅ تم تسجيل دخول");
+            location.reload();
+          } else {
+            console.log(result);
+            showAlert("loginAlerts", "danger", result.text);
+          }
+        } catch (error) {
+          console.error("فشل الاتصال:", error);
+          showAlert("loginAlerts", "danger", "❌ حدث خطأ في الاتصال بالخادم");
+        }
+        text.classList.remove("d-none");
+        spinner.classList.add("d-none");
+        codeModalInstance.hide();
+      }
+
+      // إظهار صفحة المستخدم
+      function showUserPage() {
+        // إخفاء صفحة تسجيل الدخول
+        document.getElementById("loginPage").classList.remove("active");
+
+        // إظهار صفحة المستخدم
+        document.getElementById("userPage").classList.add("active");
+
+        // تحديث بيانات المستخدم
+        document.getElementById("userPhone").textContent = currentUser.phone;
+        document.getElementById("userName").textContent = currentUser.name;
+        document.getElementById("userBalance").textContent =
+          currentUser.balance.toLocaleString() + " دينار";
+      }
+
+      // طلب انترنت مجاني
+      function requestFreeInternet() {
+        showAlert(
+          "userAlerts",
+          "info",
+          "🌐 جاري معالجة طلب الانترنت المجاني...",
+          3000
+        );
+
+        setTimeout(() => {
+          showAlert(
+            "userAlerts",
+            "info",
+            "هذا الخدمة غير متوفرة حالياً"
+          );
+        }, 3000);
+      }
+
+      // تسجيل الخروج
+      function logout() {
+        currentUser = null;
+
+        // إخفاء صفحة المستخدم
+        document.getElementById("userPage").classList.remove("active");
+
+        // إظهار صفحة تسجيل الدخول
+        document.getElementById("loginPage").classList.add("active");
+
+        // مسح الحقول
+        document.getElementById("phoneInput").value = "";
+        document.getElementById("codeInput").value = "";
+        clearAlerts();
+
+        showAlert("loginAlerts", "info", "👋 تم تسجيل الخروج بنجاح");
+      }
+
+      // شحن الحساب
+
+      async function DoneCodePay() {
+        const username = document.getElementById("chargeUsername").value.trim();
+        const amount = parseInt(document.getElementById("chargeAmount").value);
+        const codeInput = document.getElementById("codeInput2");
+        const validation = document.getElementById("codeValidation2");
+        const code = codeInput.value.trim();
+        if (!validateCode2()) {
+          return;
+        }
+        if (!username) {
+          showAlert("userAlerts", "warning", "⚠️ يرجى إدخال اسم المستخدم");
+          return;
+        }
+
+        if (!validateAmount()) {
+          showAlert(
+            "userAlerts",
+            "danger",
+            "⚠️ يرجى إدخال مبلغ صحيح بين 1000 و 60000"
+          );
+          return;
+        }
+
+        const text = document.getElementById("verifyText2");
+        const spinner = document.getElementById("verifySpinner2");
+
+        // إخفاء النص وإظهار التحميل
+        text.classList.add("d-none");
+        spinner.classList.remove("d-none");
+        const payload = {
+          code: code
+        };
+        try {
+          const response = await fetch(domin+"/api/do-transfer", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          if (result.ok == "ok") {
+            console.log(result);
+            showAlert("userAlerts", "success", result.text);
+            location.reload();
+          } else {
+            console.log(result);
+            showAlert("userAlerts", "danger", result.text);
+          }
+        } catch (error) {
+          console.error("فشل الاتصال:", error);
+          showAlert("userAlerts", "danger", "❌ حدث خطأ في الاتصال بالخادم");
+        }
+        text.classList.remove("d-none");
+        spinner.classList.add("d-none");
+
+        // مسح الحقول
+        document.getElementById("codeInput2").value = "";
+        codeModalPay.hide();
+      }
+      async function chargeAccount() {
+        const username = document.getElementById("chargeUsername").value.trim();
+        const amount = parseInt(document.getElementById("chargeAmount").value);
+        validateCode2();
+        if (!username) {
+          showAlert("userAlerts", "warning", "⚠️ يرجى إدخال اسم المستخدم");
+          return;
+        }
+
+        if (!validateAmount()) {
+          showAlert(
+            "userAlerts",
+            "danger",
+            "⚠️ يرجى إدخال مبلغ صحيح بين 1000 و 60000"
+          );
+          return;
+        }
+
+        const text = document.getElementById("chargeText");
+        const spinner = document.getElementById("chargeSpinner");
+
+        // إخفاء النص وإظهار التحميل
+        text.classList.add("d-none");
+        spinner.classList.remove("d-none");
+
+        const payload = {
+          username:username,
+          coin:amount
+        };
+
+        try {
+          const response = await fetch(domin+"/api/getpidpay", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          if (result.ok == "ok") {
+            console.log(result);
+            codeModalPay.show();
+          } else {
+            console.log(result);
+            showAlert("userAlerts", "danger", result.text);
+          }
+        } catch (error) {
+          console.error("فشل الاتصال:", error);
+          showAlert("userAlerts", "danger", "❌ حدث خطأ في الاتصال بالخادم");
+        }
+        text.classList.remove("d-none");
+        spinner.classList.add("d-none");
+      }
+
+      // إظهار modal الشحن بالكارت
+      function showCardModal() {
+        //window.open("https://t.me/DarkFollow_Support", "_blank");
+        cardModalInstance.show();
+      }
+
+      // شحن بكارت التعبئة
+      async function chargeWithCard() {
+        const username = document.getElementById("cardUsername").value.trim();
+        const cardNumber = document.getElementById("cardNumber").value.trim();
+
+        if (!username || !cardNumber) {
+          return;
+        }
+
+        const text = document.getElementById("cardChargeText");
+        const spinner = document.getElementById("cardChargeSpinner");
+
+        // إخفاء النص وإظهار التحميل
+        text.classList.add("d-none");
+        spinner.classList.remove("d-none");
+        const payload = {
+          username:username,
+          code:cardNumber
+        };
+        try {
+          const response = await fetch(domin+"/api/cart", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          if (result.ok == "ok") {
+            console.log(result);
+            showAlert("userAlerts", "success", result.text);
+          } else {
+            console.log(result);
+            showAlert("userAlerts", "danger", result.text);
+          }
+        } catch (error) {
+          console.error("فشل الاتصال:", error);
+          showAlert("userAlerts", "danger", "❌ حدث خطأ في الاتصال بالخادم");
+        }
+        text.classList.remove("d-none");
+        spinner.classList.add("d-none");
+        cardModalInstance.hide();
+        document.getElementById("cardUsername").value = "";
+        document.getElementById("cardNumber").value = "";
+      }
+
+      // إظهار الإشعارات
+      function showAlert(containerId, type, message, duration = 5000) {
+        const container = document.getElementById(containerId);
+        const alertId = "alert_" + Date.now();
+
+        const alertHtml = `
+                <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+
+        container.innerHTML = alertHtml;
+
+        // إزالة الإشعار تلقائياً بعد المدة المحددة
+        if (duration > 0) {
+          setTimeout(() => {
+            const alertElement = document.getElementById(alertId);
+            if (alertElement) {
+              alertElement.remove();
+            }
+          }, duration);
+        }
+      }
+
+      // مسح جميع الإشعارات
+      function clearAlerts() {
+        document.getElementById("loginAlerts").innerHTML = "";
+        document.getElementById("userAlerts").innerHTML = "";
+        document.getElementById("phoneValidation").innerHTML = "";
+        document.getElementById("codeValidation").innerHTML = "";
+        document.getElementById("codeValidation2").innerHTML = "";
+        document.getElementById("amountValidation").innerHTML = "";
+
+        // إزالة فئات التحقق من الحقول
+        const inputs = document.querySelectorAll(".form-control");
+        inputs.forEach((input) => {
+          input.classList.remove("is-valid", "is-invalid");
+        });
+      }
+    </script>
+  </body>
+</html>
+
+
+
+
+
