@@ -6,7 +6,7 @@ from uuid import uuid4
 from telebot import TeleBot
 
 
-key = "KBAUKtMjbGmszaiU30Rx55U5UfnJqlodRUADojOvdAYBDcPAlLPvlFBD2iyZ"
+key = "gxAavYgPbXuK6KS4l2CJf4BbC1PBLEHQ0WkG7BaOjI3u93dpcVTujSlr7qNv"
 PicX = 1000
 
 def CilentUser(login,amount=0):
@@ -387,6 +387,7 @@ def DoTransfer():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0",debug=True)
+
 
 
 
